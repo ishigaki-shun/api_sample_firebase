@@ -1,6 +1,12 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-admin.initializeApp();
+const serviceAccount = require("./etc/fir-sample-12daf-firebase-adminsdk-4tyvc-b8f7cc0456.json");
+
+//initialize
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://fir-sample-12daf.firebaseio.com'
+});
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -13,9 +19,9 @@ exports.addMessage = functions.https.onRequest((req, res) => {
   // Grab the text parameter.
   const original = req.query.text;
   // Push the new message into the Realtime Database using the Firebase Admin SDK.
-  return admin.database().ref('/messages').push({original: original}).then((snapshot) => {
+  admin.database().ref('/messages').on('value', (snapshot, prevChildKey) => {
     // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
-    return res.json(snaphot.val());
+    res.json(snapshot.val());
   });
 });
 
@@ -34,3 +40,8 @@ exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
 exports.getJson = functions.https.onRequest((req, res) => {
    return res.json('sample:{key:value}');
 });
+
+exports.get = functions.https.onRequest((req, res) => {
+   return res.json('sample:{key:value}');
+});
+
