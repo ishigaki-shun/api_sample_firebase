@@ -6,7 +6,7 @@ firebase-debug.log
 npm-debug.log
 package-lock.json
 .npmrc
-functions/etc/flutter_sample_auth.JSON
+functions/etc/*.JSON
 
 .DS_Store
 .idea
