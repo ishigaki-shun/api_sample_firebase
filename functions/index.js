@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const serviceAccount = require("./etc/fir-sample-12daf-firebase-adminsdk-4tyvc-b8f7cc0456.json");
+const serviceAccount = require("./etc/flutter_sample_auth.json");
 
 //initialize
 admin.initializeApp({
