@@ -29,4 +29,8 @@ exports.makeUppercase = functions.database.ref('/messages/{pushId}/original')
       // writing to the Firebase Realtime Database.
       // Setting an "uppercase" sibling in the Realtime Database returns a Promise.
       return snapshot.ref.parent.child('uppercase').set(uppercase);
-    });
+});
+
+exports.getJson = functions.https.onRequest((req, res) => {
+   return res.json('sample:{key:value}');
+});
