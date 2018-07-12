@@ -41,7 +41,9 @@ exports.getJson = functions.https.onRequest((req, res) => {
    return res.json('sample:{key:value}');
 });
 
-exports.get = functions.https.onRequest((req, res) => {
-   return res.json('sample:{key:value}');
+exports.init = functions.https.onRequest((req, res) => {
+   admin.database().ref('/initializer').on('value', (snapshot, prevChildKey) => {
+     res.json(snapshot.val()); 
+   });
 });
 
