@@ -8,6 +8,8 @@ admin.initializeApp({
   databaseURL: 'https://fir-sample-12daf.firebaseio.com'
 });
 
+const DEFAULT_NUMBER = "000";
+
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
@@ -59,3 +61,12 @@ exports.videolist = functions.https.onRequest((req, res) => {
     res.json(snapshot.val());
   });
 });
+
+exports.samplePost = functions.https.onRequest((req, res) => {
+  const number = req.body.number || DEFAULT_NUMBER;
+  console.log(number);
+  admin.database().ref('/sex/${number}').on('value', (snapshot, prevChildKey) => {
+    res.json(snapshot.val());
+  });
+});
+
