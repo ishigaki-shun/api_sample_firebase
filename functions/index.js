@@ -48,12 +48,14 @@ exports.init = functions.https.onRequest((req, res) => {
 });
 
 exports.notification = functions.https.onRequest((req, res) => {
-    // Grab the text parameter.
   const original = req.query.uuid;
-  // Push the new message into the Realtime Database using the Firebase Admin SDK.
   admin.database().ref('/user/' + original + '/videos').on('value', (snapshot, prevChildKey) => {
-    // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
     res.json(snapshot.val());
   });
 });
 
+exports.videolist = functions.https.onRequest((req, res) => {
+  admin.database().ref('/videos').on('value', (snapshot, prevChildKey) => {
+    res.json(snapshot.val());
+  });
+});
