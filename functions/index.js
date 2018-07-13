@@ -64,8 +64,8 @@ exports.videolist = functions.https.onRequest((req, res) => {
 
 exports.samplePost = functions.https.onRequest((req, res) => {
   const number = req.body.number || DEFAULT_NUMBER;
-  console.log(number);
-  admin.database().ref('/sex/${number}').on('value', (snapshot, prevChildKey) => {
+  console.log('/sex/' + number);
+  admin.database().ref('/sex/' + number).on('value', (snapshot, prevChildKey) => {
     res.json(snapshot.val());
   });
 });
