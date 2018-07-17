@@ -75,6 +75,14 @@ exports.samplePost = functions.https.onRequest((req, res) => {
   });
 });
 
+exports.videoInformation = functions.https.onRequest((req, res) => {
+  const userName = req.body.user_name || "";
+  admin.database().ref('/videos').push({upload_user: {name: userName}}).then((snapshot) => {
+    res.json(snapshot.val());
+  });
+});
+
+// TODO: 動画投稿API
 exports.fileupload = functions.https.onRequest((req, res) => {
   // ↓ CORS
   if (req.method === 'OPTIONS') {
