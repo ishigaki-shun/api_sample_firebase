@@ -83,15 +83,23 @@ exports.videoInformation = functions.https.onRequest((req, res) => {
   const timestamp = req.body.timestamp || "";
   const videoURL = req.body.video_url || "";
 
-  console.log('try_video_id:' + tryVideoId);
-
   if (tryVideoId !== null && tryVideoId !== "") {
-    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     admin.database().ref('/videos/' + tryVideoId + "/try_users").push({name: userName, image: userImage, uid: uid, video_url: videoURL});
   }
 
   //admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL});
   return admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL}).then((snapshot) => {
+     return res.status(200).send('success');
+  });
+});
+
+exports.register = functions.https.onRequest((req, res) => {
+  const userName = req.body.name || "";
+  const userImage = req.body.image || "";
+  const uid = req.body.uid || "";
+
+  //admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL});
+  return admin.database().ref('/user/' + uid).set({name: userName, image: userImage}).then((snapshot) => {
      return res.status(200).send('success');
   });
 });
