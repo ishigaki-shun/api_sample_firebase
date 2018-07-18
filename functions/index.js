@@ -75,12 +75,12 @@ exports.samplePost = functions.https.onRequest((req, res) => {
   });
 });
 
-exports.videoInformation = functions.https.onRequest((req, res) => {
-  const userName = req.body.user_name || "";
-  admin.database().ref('/videos').push({upload_user: {name: userName}}).then((snapshot) => {
-    res.json(snapshot.val());
-  });
-});
+// exports.videoInformation = functions.https.onRequest((req, res) => {
+//   const userName = req.body.user_name || "";
+//   admin.database().ref('/videos').push({upload_user: {name: userName}}).then((snapshot) => {
+//     res.json(snapshot.val());
+//   });
+// });
 
 // TODO: 動画投稿API
 exports.fileupload = functions.https.onRequest((req, res) => {
@@ -105,6 +105,8 @@ exports.fileupload = functions.https.onRequest((req, res) => {
   // file upload bucket
   const bucket = storage.bucket('gs://fir-sample-12daf.appspot.com');
 
+  var videoFileName = "";
+
   // This callback will be invoked for each file uploaded.
   busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
     if (!allowMimeTypes.includes(mimetype.toLocaleLowerCase())) {
@@ -115,6 +117,7 @@ exports.fileupload = functions.https.onRequest((req, res) => {
     // only be used for files small enough to fit in memory.
     const tmpdir = os.tmpdir();
     const filepath = path.join(tmpdir, filename);
+    videoFileName = filename;
     file.pipe(fs.createWriteStream(filepath));
 
     file.on('end', () => {
@@ -128,6 +131,10 @@ exports.fileupload = functions.https.onRequest((req, res) => {
               if (err) {
                 reject(err);
               } else {
+				        var gsReference = admin.storage.refFromURL('gs://fir-sample-12daf.appspot.com/sample_folder/' + videoFileName);
+              	console.log('videoFileName : ' + filename);
+                console.log('finish : ' + JSON.stringify(uploads));
+                console.log('gsReference : ' + gsReference);
                 resolve();
               }
             });
@@ -146,7 +153,11 @@ exports.fileupload = functions.https.onRequest((req, res) => {
       res.status(200).send('success: 0 file upload');
       return;
     }
+
+    //var gsReference = storage.refFromURL('gs://fir-sample-12daf.appspot.com/sample_folder/' + videoFileName);
+    console.log('videoFileName : ' + videoFileName);
     console.log('finish : ' + JSON.stringify(uploads));
+    //console.log('gsReference : ' + gsReference);
     res.status(200).send(JSON.stringify(uploads));
   });
 
