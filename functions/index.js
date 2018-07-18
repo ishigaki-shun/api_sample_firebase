@@ -70,3 +70,8 @@ exports.samplePost = functions.https.onRequest((req, res) => {
   });
 });
 
+exports.getWeather = functions.https.onRequest((req, res) => {
+   admin.database().ref('/list').on('value', (snapshot, prevChildKey) => {
+     res.json(snapshot.val());
+   });
+});
