@@ -75,12 +75,26 @@ exports.samplePost = functions.https.onRequest((req, res) => {
   });
 });
 
-// exports.videoInformation = functions.https.onRequest((req, res) => {
-//   const userName = req.body.user_name || "";
-//   admin.database().ref('/videos').push({upload_user: {name: userName}}).then((snapshot) => {
-//     res.json(snapshot.val());
-//   });
-// });
+exports.videoInformation = functions.https.onRequest((req, res) => {
+  const userName = req.body.name || "";
+  const userImage = req.body.image || "";
+  const uid = req.body.uid || "";
+  const tryVideoId = req.body.try_video_id || "";
+  const timestamp = req.body.timestamp || "";
+  const videoURL = req.body.video_url || "";
+
+  console.log('try_video_id:' + tryVideoId);
+
+  if (tryVideoId !== null && tryVideoId !== "") {
+    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    admin.database().ref('/videos/' + tryVideoId + "/try_users").push({name: userName, image: userImage, uid: uid, video_url: videoURL});
+  }
+
+  //admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL});
+  return admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL}).then((snapshot) => {
+     return res.status(200).send('success');
+  });
+});
 
 // TODO: 動画投稿API
 exports.fileupload = functions.https.onRequest((req, res) => {
