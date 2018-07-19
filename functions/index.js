@@ -187,3 +187,23 @@ exports.fileupload = functions.https.onRequest((req, res) => {
   // busboy, and get a callback when it's finished.
   busboy.end(req.rawBody);
 });
+
+exports.getDownloadURL = functions.https.onRequest((req, res) => {
+
+  const storageA = firebase.storage();
+  const storageRefA = storageA.ref();
+
+
+  storageRefA.child('sample_folder/Butterfly-209.mp4').getDownloadURL().then(function(url){
+
+  // `url` is the download URL for 'images/stars.jpg'
+  console.log(url)
+
+  return url
+}).catch(function(error) {
+  // Handle any errors
+  return res.json('sample:{key:value}');
+});
+   return res.json('sample:{key:value}');
+
+});
