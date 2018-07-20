@@ -17,10 +17,6 @@ const DEFAULT_NUMBER = "000";
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send("Hello from Firebase!");
-});
 
 exports.addMessage = functions.https.onRequest((req, res) => {
   // Grab the text parameter.
@@ -189,21 +185,48 @@ exports.fileupload = functions.https.onRequest((req, res) => {
 });
 
 exports.getDownloadURL = functions.https.onRequest((req, res) => {
+  // var bucket = admin.storage().bucket('gs://fir-sample-12daf.appspot.com');
+  // var storage = admin.storage('gs://fir-sample-12daf.appspot.com');
+  // var storageRef = admin.storage().ref('gs://fir-sample-12daf.appspot.com');
+  // var storageRef = admin.storage();
+  // var bucket = admin.storage().bucket('sample_folder/');
+  // var bucket = admin.storage().bucket('sample_folder/').file('image1.png').getDownloadURL;
+   // var bucket = admin.storage().bucket('sample_folder/').getDownloadURL;
+   // var bucket = admin.storage().bucket('sample_folder/').child('image1.png').getDownloadURL();
+   // var bucket = admin.storage().bucket('sample_folder/').object.name;
 
-  const storageA = firebase.storage();
-  const storageRefA = storageA.ref();
+    // var bucket = admin.storage().bucket('sample_folder/').child('image1.png').name;
+
+    // var ref = admin.storage().bucket('sample_folder/').ref();
+     var ref = admin.storage().ref('sample_folder/image1.png');
 
 
-  storageRefA.child('sample_folder/Butterfly-209.mp4').getDownloadURL().then(function(url){
 
-  // `url` is the download URL for 'images/stars.jpg'
-  console.log(url)
+    // console.log(bucket.child('sample_folder/image1.png'));
+    //console.log(bucket.child());
+    // console.log(bucket);
+    console.log(ref);
 
-  return url
-}).catch(function(error) {
-  // Handle any errors
-  return res.json('sample:{key:value}');
+  //return res.json(storageRef);
 });
-   return res.json('sample:{key:value}');
 
-});
+
+// exports.getDownloadURL = functions.https.onRequest((req, res) => {_
+
+//   //const storageA = admin.storage();
+//   //const storageRefA = storageA.ref();
+//   var bucket = admin.storage().bucket();
+
+//   storageRefA.child('sample_folder/Butterfly-209.mp4').getDownloadURL().then(function(url){
+
+//   // `url` is the download URL for 'images/stars.jpg'
+//   console.log(url)
+
+//   return url
+// }).catch(function(error) {
+//   // Handle any errors
+//   return res.json('sample:{key:value}');
+// });
+//    return res.json('sample:{key:value}');
+
+// });
