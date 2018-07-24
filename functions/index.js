@@ -1,32 +1,31 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const storage = require('@google-cloud/storage')();
+const storage = require('@google-cloud/storage')({keyFilename: "./etc/serviceAccountKey.json"});
+const bucket = storage.bucket('fir-sample-12daf.appspot.com');
 const Busboy = require('busboy');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const serviceAccount = require("./etc/flutter_sample_auth.json");
+const serviceAccount = require("./etc/serviceAccountKey.json");
 
-//initialize
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://fir-sample-12daf.firebaseio.com'
 });
 
-var config = {
-  apikey: "AIzaSyBcM1FZZNmhWF51WoV6h_lpU7I5pvIQAxs",
-  authDomain: "fir-sample-12daf.firebaseapp.com",
-  databaseURL: "https://fir-sample-12daf.firebaseio.com",
-  projectId: "fir-sample-12daf",
-  storageBucket: "fir-sample-12daf.appspot.com",
-  messagingSenderId: "1019794557290"
-};
+// var config = {
+//   apikey: "AIzaSyBcM1FZZNmhWF51WoV6h_lpU7I5pvIQAxs",
+//   authDomain: "fir-sample-12daf.firebaseapp.com",
+//   databaseURL: "https://fir-sample-12daf.firebaseio.com",
+//   projectId: "fir-sample-12daf",
+//   storageBucket: "fir-sample-12daf.appspot.com",
+//   messagingSenderId: "1019794557290"
+// };
 
-firebase.initializeApp(config);
-
+// admin.initializeApp(config);
 
 const DEFAULT_NUMBER = "000";
-
+const BUCKET_FOLDER = "sample_folder/";
 
 exports.example = functions.https.onRequest((request, response) => {
  console.log(firebase);
@@ -95,17 +94,28 @@ exports.videoInformation = functions.https.onRequest((req, res) => {
   const userName = req.body.name || "";
   const userImage = req.body.image || "";
   const uid = req.body.uid || "";
+  const filename = req.body.filename || "";
   const tryVideoId = req.body.try_video_id || "";
   const timestamp = req.body.timestamp || "";
-  const videoURL = req.body.video_url || "";
+  const file = bucket.file(BUCKET_FOLDER + filename);
 
-  if (tryVideoId !== null && tryVideoId !== "") {
-    admin.database().ref('/videos/' + tryVideoId + "/try_users").push({name: userName, image: userImage, uid: uid, video_url: videoURL});
-  }
+  var videoUrl = "";
 
-  //admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL});
-  return admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL}).then((snapshot) => {
-     return res.status(200).send('success');
+  file.getSignedUrl({
+  action: 'read',
+  expires: '03-09-2491'
+  }).then(signedUrls => {
+  	// signedUrls[0] contains the file's public URL
+    console.log('URL: ' + signedUrls[0]);
+  	videoUrl = signedUrls[0];
+
+  	if (tryVideoId !== null && tryVideoId !== "") {
+    admin.database().ref('/videos/' + tryVideoId + "/try_users" + uid).set({name: userName, image: userImage, video_url: videoUrl});
+  	}
+
+  	return admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoUrl}).then((snapshot) => {
+    	return res.status(200).send('success');
+  	});
   });
 });
 
@@ -114,7 +124,6 @@ exports.register = functions.https.onRequest((req, res) => {
   const userImage = req.body.image || "";
   const uid = req.body.uid || "";
 
-  //admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoURL});
   return admin.database().ref('/user/' + uid).set({name: userName, image: userImage}).then((snapshot) => {
      return res.status(200).send('success');
   });
@@ -140,9 +149,6 @@ exports.fileupload = functions.https.onRequest((req, res) => {
   // This object will accumulate all the uploaded files, keyed by their name.
   const uploads = {};
   const allowMimeTypes = ['video/mp4'];
-  // file upload bucket
-  const bucket = storage.bucket('gs://fir-sample-12daf.appspot.com');
-
   var videoFileName = "";
 
   // This callback will be invoked for each file uploaded.
@@ -169,10 +175,6 @@ exports.fileupload = functions.https.onRequest((req, res) => {
               if (err) {
                 reject(err);
               } else {
-				        var gsReference = admin.storage.refFromURL('gs://fir-sample-12daf.appspot.com/sample_folder/' + videoFileName);
-              	console.log('videoFileName : ' + filename);
-                console.log('finish : ' + JSON.stringify(uploads));
-                console.log('gsReference : ' + gsReference);
                 resolve();
               }
             });
@@ -180,7 +182,6 @@ exports.fileupload = functions.https.onRequest((req, res) => {
         })
         .catch(err => {
           console.error(err);
-          // TODO error handling
         });
     });
   });
@@ -192,10 +193,6 @@ exports.fileupload = functions.https.onRequest((req, res) => {
       return;
     }
 
-    //var gsReference = storage.refFromURL('gs://fir-sample-12daf.appspot.com/sample_folder/' + videoFileName);
-    console.log('videoFileName : ' + videoFileName);
-    console.log('finish : ' + JSON.stringify(uploads));
-    //console.log('gsReference : ' + gsReference);
     res.status(200).send(JSON.stringify(uploads));
   });
 
@@ -205,21 +202,15 @@ exports.fileupload = functions.https.onRequest((req, res) => {
 });
 
 exports.getDownloadURL = functions.https.onRequest((req, res) => {
+  const filename = req.query.filename;
 
-  const storageA = firebase.storage();
-  const storageRefA = storageA.ref();
-
-
-  storageRefA.child('sample_folder/Butterfly-209.mp4').getDownloadURL().then(function(url){
-
-  // `url` is the download URL for 'images/stars.jpg'
-  console.log(url)
-
-  return url
-}).catch(function(error) {
-  // Handle any errors
-  return res.json('sample:{key:value}');
-});
-   return res.json('sample:{key:value}');
-
+  const file = bucket.file(BUCKET_FOLDER + filename);
+  return file.getSignedUrl({
+  action: 'read',
+  expires: '03-09-2491'
+}).then(signedUrls => {
+  // signedUrls[0] contains the file's public URL
+    console.log('URL: ' + signedUrls[0]);
+  	return res.json(signedUrls[0]);
+  });
 });
