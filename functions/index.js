@@ -13,8 +13,24 @@ admin.initializeApp({
   databaseURL: 'https://fir-sample-12daf.firebaseio.com'
 });
 
+var config = {
+  apikey: "AIzaSyBcM1FZZNmhWF51WoV6h_lpU7I5pvIQAxs",
+  authDomain: "fir-sample-12daf.firebaseapp.com",
+  databaseURL: "https://fir-sample-12daf.firebaseio.com",
+  projectId: "fir-sample-12daf",
+  storageBucket: "fir-sample-12daf.appspot.com",
+  messagingSenderId: "1019794557290"
+};
+
+firebase.initializeApp(config);
+
+
 const DEFAULT_NUMBER = "000";
 
+
+exports.example = functions.https.onRequest((request, response) => {
+ console.log(firebase);
+});
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
