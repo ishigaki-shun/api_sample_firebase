@@ -70,8 +70,8 @@ exports.init = functions.https.onRequest((req, res) => {
 });
 
 exports.notification = functions.https.onRequest((req, res) => {
-  const original = req.query.uuid;
-  admin.database().ref('/user/' + original + '/videos').on('value', (snapshot, prevChildKey) => {
+  const uuid = req.query.uuid;
+  admin.database().ref('/users/' + uuid + '/videos').on('value', (snapshot, prevChildKey) => {
     res.json(snapshot.val());
   });
 });
@@ -110,12 +110,14 @@ exports.videoInformation = functions.https.onRequest((req, res) => {
   	videoUrl = signedUrls[0];
 
   	if (tryVideoId !== null && tryVideoId !== "") {
-    admin.database().ref('/videos/' + tryVideoId + "/try_users" + uid).set({name: userName, image: userImage, video_url: videoUrl});
+    	admin.database().ref('/videos/' + tryVideoId + "/try_users/" + uid).set({name: userName, image: userImage, video_url: videoUrl});
   	}
 
-  	return admin.database().ref('/videos').push({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoUrl}).then((snapshot) => {
+  	var key = admin.database().ref().push().key;
+  	admin.database().ref('/videos/' + key).set({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoUrl});
+    admin.database().ref('/users/' + key + '/videos/').set(tryVideoId).then(() => {
     	return res.status(200).send('success');
-  	});
+    });
   });
 });
 
@@ -124,7 +126,7 @@ exports.register = functions.https.onRequest((req, res) => {
   const userImage = req.body.image || "";
   const uid = req.body.uid || "";
 
-  return admin.database().ref('/user/' + uid).set({name: userName, image: userImage}).then((snapshot) => {
+  return admin.database().ref('/users/' + uid).set({name: userName, image: userImage}).then((snapshot) => {
      return res.status(200).send('success');
   });
 });
