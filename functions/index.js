@@ -96,29 +96,35 @@ exports.videoInformation = functions.https.onRequest((req, res) => {
   const uid = req.body.uid || "";
   const filename = req.body.filename || "";
   const tryVideoId = req.body.try_video_id || "";
+  const tryVideoUserId = req.body.try_video_user_id || "";
   const timestamp = req.body.timestamp || "";
   const file = bucket.file(BUCKET_FOLDER + filename);
 
   var videoUrl = "";
 
   file.getSignedUrl({
-  action: 'read',
-  expires: '03-09-2491'
+  	action: 'read',
+  	expires: '03-09-2491'
   }).then(signedUrls => {
   	// signedUrls[0] contains the file's public URL
     console.log('URL: ' + signedUrls[0]);
   	videoUrl = signedUrls[0];
 
+  	// やってみた動画の場合、元の動画にtry_userとして紐づける
   	if (tryVideoId !== null && tryVideoId !== "") {
     	admin.database().ref('/videos/' + tryVideoId + "/try_users/" + uid).set({name: userName, image: userImage, video_url: videoUrl});
   	}
 
+  	// 撮影した動画を追加
   	var key = admin.database().ref().push().key;
   	admin.database().ref('/videos/' + key).set({upload_user: {name: userName, image: userImage, uid: uid}, timestamp: timestamp, video_url: videoUrl});
-    admin.database().ref('/users/' + key + '/videos/').set(tryVideoId).then(() => {
+
+  	// Userにやってみた動画のIDを追加
+    return admin.database().ref('/users/' + uid + '/videos/' + key).set({timestamp: timestamp, video_url: videoUrl}).then(() => {
     	return res.status(200).send('success');
     });
-  });
+  }).catch(error => {});
+
 });
 
 exports.register = functions.https.onRequest((req, res) => {
